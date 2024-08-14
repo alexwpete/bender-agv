@@ -39,7 +39,7 @@ ament_target_dependencies(gtsam_bender_node rclcpp std_msgs geometry_msgs nav_ms
 target_link_libraries(gtsam_bender_node gtsam ${Boost_LIBRARIES})
 
 # Build the gtsam executable
-add_executable(gtsam_test src/gtsam.cpp)
+add_executable(gtsam_test src/gtsam_test.cpp)
 ament_target_dependencies(gtsam_test rclcpp std_msgs geometry_msgs nav_msgs sensor_msgs message_filters tf2 tf2_geometry_msgs)
 target_link_libraries(gtsam_test gtsam ${Boost_LIBRARIES})
 
