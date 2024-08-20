@@ -63,7 +63,7 @@ private:
           camera_translation_ = camera_in_world.getOrigin();
 
           // Print the camera's pose in the world frame
-          RCLCPP_INFO(this->get_logger(), "");
+          // RCLCPP_INFO(this->get_logger(), "");
           // RCLCPP_INFO(this->get_logger(), "camera: \t x=%.6f, \t y=%.6f, \t z=%.6f",
           //             camera_translation_.x(), camera_translation_.y(), camera_translation_.z());
 
