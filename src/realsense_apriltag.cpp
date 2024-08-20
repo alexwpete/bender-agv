@@ -62,7 +62,7 @@ private:
           tf2::Quaternion camera_rotation = camera_in_world.getRotation();
 
           //RCLCPP_INFO(this->get_logger(), "Camera Pose in World Frame:");
-          RCLCPP_INFO(this->get_logger(), "Translation: x=%.6f, \t  y=%.6f, \t z=%.6f",
+          RCLCPP_INFO(this->get_logger(), "camera: \t x=%.6f, \t  y=%.6f, \t z=%.6f",
                       camera_translation.x(), camera_translation.y(), camera_translation.z());
           //RCLCPP_INFO(this->get_logger(), "Rotation: x=%.6f, y=%.6f, z=%.6f, w=%.6f",
 //                      camera_rotation.x(), camera_rotation.y(), camera_rotation.z(), camera_rotation.w());
@@ -114,7 +114,7 @@ private:
     auto position = msg->pose.position;
     auto orientation = msg->pose.orientation;
 
-    RCLCPP_INFO(this->get_logger(), "PoseStamped - Position: x=%.6f, \t y=%.6f, \t z=%.6f",
+    RCLCPP_INFO(this->get_logger(), "april: \t x=%.6f, \t y=%.6f, \t z=%.6f",
                 position.x, position.y, position.z);
     // RCLCPP_INFO(this->get_logger(), "Orientation: x=%.6f, y=%.6f, z=%.6f, w=%.6f",
     //             orientation.x, orientation.y, orientation.z, orientation.w);

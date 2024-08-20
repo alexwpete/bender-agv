@@ -505,6 +505,18 @@ such as:
 ```
 
 
+Set visualization to false with:
+
+```
+ bool visualization = false;
+ ```
+
+ within:
+
+ ```
+ /home/bender/bender_ws/src/ORBSLAM3_ROS2_wrapper/src/stereo/stereo.cpp
+ ```
+
 ## GTSAM
 ```
 git clone https://github.com/borglab/gtsam.git
@@ -521,7 +533,10 @@ cd build
 cmake ..
 make check (optional, runs unit tests)
 sudo make install
+sudo ldconfig
 ```
+
+
 
 ## April
 
@@ -595,3 +610,13 @@ ros2 run apriltag_ros apriltag_node --ros-args \
     --params-file `ros2 pkg prefix apriltag_ros`/share/apriltag_ros/cfg/tags_36h11.yaml
 
 ```
+
+```
+source /opt/ros/humble/setup.bash
+source ~/ros2_humble/install/setup.bash
+source ~/bender_ws/install/setup.bash
+```
+
+```
+ colcon build --packages-select gtsam_bender
+ ```

@@ -140,7 +140,7 @@ ENV ROS_DISTRO=humble
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
-# Install necessary locales and basic tools
+# # Install necessary locales and basic tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     locales sudo software-properties-common curl git wget build-essential \
     cmake python3-pip libssl-dev libusb-1.0-0-dev libudev-dev pkg-config \
@@ -152,15 +152,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# # Install OpenCV 4.2.0
-RUN git clone https://github.com/opencv/opencv.git && \
-    cd opencv && git checkout 4.2.0 && \
-    sed -i 's/ipcp-unit-growth/ipa-cp-unit-growth/g' ./3rdparty/carotene/CMakeLists.txt && \
-    sed -i 's/ipcp-unit-growth/ipa-cp-unit-growth/g' ./3rdparty/carotene/hal/CMakeLists.txt && \
-    sed -i '1i #include <thread>' modules/gapi/test/gapi_async_test.cpp && \
-    mkdir build && cd build && \
-    cmake -D CMAKE_BUILD_TYPE=Release -D WITH_CUDA=OFF -D CMAKE_INSTALL_PREFIX=/usr/local .. && \
-    make -j$(nproc) && sudo make install
+# # # Install OpenCV 4.2.0
+# RUN git clone https://github.com/opencv/opencv.git && \
+#     cd opencv && git checkout 4.2.0 && \
+#     sed -i 's/ipcp-unit-growth/ipa-cp-unit-growth/g' ./3rdparty/carotene/CMakeLists.txt && \
+#     sed -i 's/ipcp-unit-growth/ipa-cp-unit-growth/g' ./3rdparty/carotene/hal/CMakeLists.txt && \
+#     sed -i '1i #include <thread>' modules/gapi/test/gapi_async_test.cpp && \
+#     mkdir build && cd build && \
+#     cmake -D CMAKE_BUILD_TYPE=Release -D WITH_CUDA=OFF -D CMAKE_INSTALL_PREFIX=/usr/local .. && \
+#     make -j$(nproc) && sudo make install
 
 # # ROS2 Humble Installation
 RUN sudo apt update && sudo apt install locales -y && \
@@ -205,14 +205,27 @@ RUN wget https://github.com/IntelRealSense/librealsense/archive/refs/tags/v2.53.
     -DCMAKE_BUILD_TYPE=release -DBUILD_EXAMPLES=true -DBUILD_GRAPHICAL_EXAMPLES=true && \
     sudo make uninstall && make clean && make -j$(nproc) && sudo make install
     
+# Set up ROS2 workspace for RealSense ROS wrapper old
+# RUN mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src && \
+#     git clone https://github.com/IntelRealSense/realsense-ros.git -b ros2-master && \
+#     cd ~/ros2_ws && \
+#     sudo apt-get install python3-rosdep -y && \
+#     sudo rosdep init && rosdep update && \
+#     rosdep install -i --from-path src --rosdistro $ROS_DISTRO --skip-keys=librealsense2 -y && \
+#     colcon build
+
 # Set up ROS2 workspace for RealSense ROS wrapper
 RUN mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src && \
     git clone https://github.com/IntelRealSense/realsense-ros.git -b ros2-master && \
     cd ~/ros2_ws && \
     sudo apt-get install python3-rosdep -y && \
-    sudo rosdep init && rosdep update && \
-    rosdep install -i --from-path src --rosdistro $ROS_DISTRO --skip-keys=librealsense2 -y && \
-    colcon build
+    if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then sudo rosdep init; fi && \
+    rosdep update && \
+    /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; rosdep install -i --from-path src --rosdistro $ROS_DISTRO --skip-keys=librealsense2 -y" && \
+    /bin/bash -c "source /opt/ros/$ROS_DISTRO/setup.bash; colcon build"
+
+
+
 
 # Install ORB-SLAM3, GTSAM, OPENCV, etc.
 RUN git clone https://github.com/opencv/opencv.git && \
