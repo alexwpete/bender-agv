@@ -85,7 +85,8 @@ private:
     }
     else
     {
-      RCLCPP_INFO(this->get_logger(), "Received an empty TFMessage.");
+      // RCLCPP_INFO(this->get_logger(), "Received an empty TFMessage.");
+      
       // Set camera_translation_ to NaN values
       camera_translation_.setValue(
         std::numeric_limits<double>::quiet_NaN(),
