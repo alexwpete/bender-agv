@@ -22,6 +22,8 @@ public:
 private:
   std::vector<tf2::Transform> transform_samples_;
   bool first_tf_stored_;
+  tf2::Transform first_transform_; // Store the first valid transform as ^W T_A
+  tf2::Vector3 camera_translation_;
 
   void tf_callback(const tf2_msgs::msg::TFMessage::SharedPtr msg)
   {
@@ -57,17 +59,16 @@ private:
           tf2::Transform inverse_current_transform = current_transform.inverse();
           tf2::Transform camera_in_world = first_transform_ * inverse_current_transform;
 
-          // Print the camera's pose in the world frame
-          tf2::Vector3 camera_translation = camera_in_world.getOrigin();
-          tf2::Quaternion camera_rotation = camera_in_world.getRotation();
+          // Store the camera's translation in the world frame for error calculation
+          camera_translation_ = camera_in_world.getOrigin();
 
-          //RCLCPP_INFO(this->get_logger(), "Camera Pose in World Frame:");
+          // Print the camera's pose in the world frame
+          RCLCPP_INFO(this->get_logger(), "");
           RCLCPP_INFO(this->get_logger(), "camera: \t x=%.6f, \t y=%.6f, \t z=%.6f",
-                      camera_translation.x(), camera_translation.y(), camera_translation.z());
-          //RCLCPP_INFO(this->get_logger(), "Rotation: x=%.6f, y=%.6f, z=%.6f, w=%.6f",
-//                      camera_rotation.x(), camera_rotation.y(), camera_rotation.z(), camera_rotation.w());
+                      camera_translation_.x(), camera_translation_.y(), camera_translation_.z());
 
           // Convert current quaternion to Euler angles (roll, pitch, yaw)
+          tf2::Quaternion camera_rotation = camera_in_world.getRotation();
           tf2::Matrix3x3 m(camera_rotation);
           double roll, pitch, yaw;
           m.getRPY(roll, pitch, yaw);
@@ -77,8 +78,9 @@ private:
           pitch = pitch * (180.0 / M_PI);
           yaw = yaw * (180.0 / M_PI);
 
-          //RCLCPP_INFO(this->get_logger(), "Euler angles: roll=%.2f, pitch=%.2f, yaw=%.2f",
-//                      roll, pitch, yaw);
+          // Uncomment if you need to print the Euler angles
+          // RCLCPP_INFO(this->get_logger(), "Euler angles: roll=%.2f, pitch=%.2f, yaw=%.2f",
+          //             roll, pitch, yaw);
         }
       }
     }
@@ -112,32 +114,26 @@ private:
   void pose_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
   {
     auto position = msg->pose.position;
-    auto orientation = msg->pose.orientation;
 
-    RCLCPP_INFO(this->get_logger(), "april: \t x=%.6f, \t y=%.6f, \t z=%.6f",
-                position.x, position.y, position.z);
-    // RCLCPP_INFO(this->get_logger(), "Orientation: x=%.6f, y=%.6f, z=%.6f, w=%.6f",
-    //             orientation.x, orientation.y, orientation.z, orientation.w);
+    if (first_tf_stored_)
+    {
+      // Calculate the error between the AprilTag position and the camera position
+      RCLCPP_INFO(this->get_logger(), "april: \t x=%.6f, \t y=%.6f, \t z=%.6f",
+                  position.x, position.y, position.z);
 
-    // Convert quaternion to Euler angles (roll, pitch, yaw)
-    tf2::Quaternion quat(orientation.x, orientation.y, orientation.z, orientation.w);
-    tf2::Matrix3x3 m(quat);
-    double roll, pitch, yaw;
-    m.getRPY(roll, pitch, yaw);
-
-    // Convert radians to degrees
-    roll = roll * (180.0 / M_PI);
-    pitch = pitch * (180.0 / M_PI);
-    yaw = yaw * (180.0 / M_PI);
-
-    // RCLCPP_INFO(this->get_logger(), "Euler angles: roll=%.2f, pitch=%.2f, yaw=%.2f",
-    //             roll, pitch, yaw);
+      RCLCPP_INFO(this->get_logger(), "error: \t x=%.6f, \t y=%.6f, \t z=%.6f",
+                  position.x - camera_translation_.x(),
+                  position.y - camera_translation_.y(),
+                  position.z - camera_translation_.z());
+    }
+    else
+    {
+      RCLCPP_WARN(this->get_logger(), "First transform is not yet stored, cannot compute error.");
+    }
   }
 
   rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr tf_subscription_;
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pose_subscription_;
-
-  tf2::Transform first_transform_; // Store the first valid transform as ^W T_A
 };
 
 int main(int argc, char **argv)
