@@ -5,6 +5,7 @@
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Transform.h>
 #include <vector>
+#include <limits> 
 
 class TfPoseListener : public rclcpp::Node
 {
@@ -63,7 +64,6 @@ private:
           camera_translation_ = camera_in_world.getOrigin();
 
           // Print the camera's pose in the world frame
-          // RCLCPP_INFO(this->get_logger(), "");
           // RCLCPP_INFO(this->get_logger(), "camera: \t x=%.6f, \t y=%.6f, \t z=%.6f",
           //             camera_translation_.x(), camera_translation_.y(), camera_translation_.z());
 
@@ -78,7 +78,6 @@ private:
           pitch = pitch * (180.0 / M_PI);
           yaw = yaw * (180.0 / M_PI);
 
-          
           // RCLCPP_INFO(this->get_logger(), "Euler angles: roll=%.2f, pitch=%.2f, yaw=%.2f",
           //             roll, pitch, yaw);
         }
@@ -87,6 +86,12 @@ private:
     else
     {
       RCLCPP_INFO(this->get_logger(), "Received an empty TFMessage.");
+      // Set camera_translation_ to NaN values
+      camera_translation_.setValue(
+        std::numeric_limits<double>::quiet_NaN(),
+        std::numeric_limits<double>::quiet_NaN(),
+        std::numeric_limits<double>::quiet_NaN()
+      );
     }
   }
 
@@ -118,9 +123,6 @@ private:
     if (first_tf_stored_)
     {
       // Calculate the error between the AprilTag position and the camera position
-      // RCLCPP_INFO(this->get_logger(), "april: \t x=%.6f, \t y=%.6f, \t z=%.6f",
-      //             position.x, position.y, position.z);
-
       RCLCPP_INFO(this->get_logger(), "error: \t x=%.6f, \t y=%.6f, \t z=%.6f",
                   position.x - camera_translation_.x(),
                   position.y - camera_translation_.y(),
