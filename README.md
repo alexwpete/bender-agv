@@ -1,3 +1,11 @@
+# Notes:
+
+The ethernet port has been configured to connect the Jetson to another host computer using a regular ethernet cable for SSH using:
+
+https://askubuntu.com/questions/22835/how-to-network-two-ubuntu-computers-using-ethernet-without-a-router
+
+To connect to the jetson from another computer, you need to configure the host pc. You cannot use the ethernet for internet when configured in this way. So, use wifi network to pull repos, etc. The credentials to log in is bender. The docker file is problematic and doesn't work in its current state.
+
 # Flashing the Jetson Orin Nano
 
 This writeup describes how to boot the Jetson Orin Nano from NVMe storage and how to set it up with the CLI instead of using the GUI-based SDK manager.
